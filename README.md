@@ -1,6 +1,6 @@
 # Team-Orion
 # Large Language Models for Knowledge Graph Extraction and Reasoning
-Project Overview
+
 This project aims to develop methodologies that integrate Large Language Models (LLMs) with existing biomedical data and unstructured text to create and validate knowledge graphs. These knowledge graphs will facilitate sophisticated reasoning over complex real-world data, enhancing data interpretability and decision-making capabilities. The project will involve building synthetic reference datasets, implementing performance metrics, and developing various systems to manage knowledge graph extraction, querying, and transformation.
 
 # Project Goals
