@@ -11,15 +11,19 @@ import subprocess
 import json
 from PIL import Image
 import base64
+import streamlit as st
+from pyvis.network import Network
+import streamlit.components.v1 as components
+
 
 if "response_history" not in st.session_state:
     st.session_state["response_history"] = []
 
 # Load sensitive information securely from environment variables
 openai.api_key = os.getenv("OPENAI_API_KEY")  
-NEO4J_URI = os.getenv("NEO4J_URI")
-NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
-NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
+NEO4J_URI = os.getenv("NEO4J_URI", "neo4j://localhost:7687")
+NEO4J_USERNAME = os.getenv("NEO4J_USERNAME", "neo4j")
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "gf6xb4kgeZKSS8p")
 
 # Initialize Neo4j driver
 neo4j_driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
@@ -33,6 +37,10 @@ def get_base64_of_bin_file(image):
     with open(image, "rb") as f:
         data = f.read()
     return base64.b64encode(data).decode()
+
+@st.cache_data
+def cached_neo4j_data(query):
+    return get_neo4j_data(query)
 
 # Encode the image as a base64 string
 orion_base64 = get_base64_of_bin_file(image_path)
@@ -180,9 +188,46 @@ def get_answer_from_llama(neo4j_context, user_query):
     
     return result.stdout.strip()
 
+def get_answer_from_meditron(neo4j_context, user_query):
+    safe_neo4j_context = escape_special_characters(neo4j_context)
+    safe_user_query = escape_special_characters(user_query)
+    full_prompt = f"Using the following graph data:\n{safe_neo4j_context}\n\nAnswer the query: '{safe_user_query}'"
+    command = f"echo \"{full_prompt}\" | ollama run meditron:latest"
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    if result.stderr:
+        print("Error:", result.stderr)
+    return result.stdout.strip()
+
+def get_answer_from_biomistral(neo4j_context, user_query):
+    safe_neo4j_context = escape_special_characters(neo4j_context)
+    safe_user_query = escape_special_characters(user_query)
+    full_prompt = f"Using the following graph data:\n{safe_neo4j_context}\n\nAnswer the query: '{safe_user_query}'"
+    command = f"echo \"{full_prompt}\" | ollama run cniongolo/biomistral:latest"
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    if result.stderr:
+        print("Error:", result.stderr)
+    return result.stdout.strip()
+
+def get_answer_from_medllama2(neo4j_context, user_query):
+    safe_neo4j_context = escape_special_characters(neo4j_context)
+    safe_user_query = escape_special_characters(user_query)
+    full_prompt = f"Using the following graph data:\n{safe_neo4j_context}\n\nAnswer the query: '{safe_user_query}'"
+    command = f"echo \"{full_prompt}\" | ollama run medllama2:latest"
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    if result.stderr:
+        print("Error:", result.stderr)
+    return result.stdout.strip()
+
+
+
+
 # Sidebar for Model Selection
 st.sidebar.header("Model Selection")
-model_choice = st.sidebar.radio("Choose the model to use:", ("OpenAI GPT-4-turbo", "Llama 3.2"))
+model_choice = st.sidebar.radio(
+    "Choose the model to use:",
+    ("OpenAI GPT-4-turbo", "Llama 3.2", "Meditron", "BioMistral", "MedLlama2")
+)
+
 
 
 # Page heading
@@ -194,6 +239,7 @@ st.markdown("<div class='input-container'>", unsafe_allow_html=True)
 
 # Input field and submit button in flex layout
 user_query = st.text_input("Enter your query:", placeholder="Type your query here...", label_visibility="collapsed", key="user_query_input")
+
 if st.button("🚀 Submit Query", key="submit_query"):
     if user_query:
         # Call the appropriate model based on user selection
@@ -201,6 +247,12 @@ if st.button("🚀 Submit Query", key="submit_query"):
             answer = get_answer_from_openai(neo4j_context, user_query)
         elif model_choice == "Llama 3.2":
             answer = get_answer_from_llama(neo4j_context, user_query)
+        elif model_choice == "Meditron":
+            answer = get_answer_from_meditron(neo4j_context, user_query)
+        elif model_choice == "BioMistral":
+            answer = get_answer_from_biomistral(neo4j_context, user_query)
+        elif model_choice == "MedLlama2":
+            answer = get_answer_from_medllama2(neo4j_context, user_query)
 
         # Display the result
         st.subheader(f"Generated Response (Model: {model_choice})")
@@ -229,4 +281,3 @@ if st.session_state.response_history:
 # Footer
 st.markdown("<hr style='border:1px solid #b97bff'>", unsafe_allow_html=True)
 st.markdown("<footer style='text-align: center; color: #888;'>Made with ❤️ using Streamlit</footer>", unsafe_allow_html=True)
-
