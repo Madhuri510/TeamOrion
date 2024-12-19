@@ -19,10 +19,11 @@ The repository is organized into the following folders:
   - `preprocessed_abstracts_data.csv` - The preprocessed abstracts data ready for knowledge graph extraction.
 
 - **Knowledge Graph**
-  - `KnowledgeGraph1.ipynb` - Notebook for knowledge graph creation and visualization.
-  - `kg1.ipynb` - Notebook for advanced entity and relationship extraction.
-  - `normalized_entities3.csv` - The normalized entities extracted from the data.
-  - `normalized_relationships3.csv` - The normalized relationships extracted from the data.
+  - `KnowledgeGraph_Final.ipynb` - Notebook for knowledge graph generation.
+  - `Test_Abstracts.csv` - Sample abstracts to extract the entities and relations from.
+  - `normalized_entities_validation.csv` - The normalized entities extracted from the data.
+  - `normalized_relationships_validation.csv` - The normalized relationships extracted from the data.
+  - `error_log_validation.txt` - log for missed abstracts or errors occured during extraction.
 
 - **Streamlit App**
   - `app.py` - Streamlit application for visualizing the knowledge graphs and querying data.
