@@ -11,6 +11,12 @@ The primary goals of this project are:
 * Develop approach to harmonize, merge and query knowledge graphs.
 * Develop approach to convert a knowledge graph back to unstructured texts.
 
+## Project Demo
+
+Watch the end-to-end workflow of extracting biomedical knowledge graphs and querying them through the Streamlit interface.
+
+▶ [Watch the Demo](Demo/orion-streamlit-app.mp4)
+
 # File Structure
 The repository is organized into the following folders:
 
